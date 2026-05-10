@@ -1,10 +1,14 @@
 from functools import lru_cache
+from pathlib import Path
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+# Resolve .env from project root (one level up from backend/)
+_ENV_FILE = Path(__file__).resolve().parents[2] / ".env"
 
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=str(_ENV_FILE),
         env_file_encoding="utf-8",
         case_sensitive=True,
         extra="ignore",
@@ -13,8 +17,8 @@ class Settings(BaseSettings):
     # Database
     DATABASE_URL: str = "postgresql+asyncpg://postgres:password@localhost:5432/promptvault"
 
-    # Redis
-    REDIS_URL: str = "redis://localhost:6379"
+    # Redis (optional — leave empty to disable rate limiting and caching)
+    REDIS_URL: str = ""
 
     # JWT
     JWT_SECRET: str = "change-me-256-bit-random-secret"

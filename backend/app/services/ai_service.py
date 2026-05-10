@@ -21,7 +21,7 @@ from app.utils.quality_scorer import score_prompt
 settings = get_settings()
 
 OPENROUTER_MODEL = "google/gemma-3-8b-it:free"
-GROQ_MODEL = "gemma2-9b-it"
+GROQ_MODEL = "llama-3.1-8b-instant"
 
 STYLE_INSTRUCTIONS = {
     "professional": "Rewrite the following prompt to be professional, clear, and formal. Use precise language.",
@@ -36,15 +36,16 @@ STYLE_INSTRUCTIONS = {
 # ---------------------------------------------------------------------------
 
 
-async def _call_openrouter(system: str, user_msg: str) -> str | None:
-    if not settings.OPENROUTER_API_KEY:
+async def _call_openrouter(system: str, user_msg: str, api_key: str | None = None) -> str | None:
+    key = api_key or settings.OPENROUTER_API_KEY
+    if not key:
         return None
     try:
         async with httpx.AsyncClient(timeout=8.0) as client:
             response = await client.post(
                 "https://openrouter.ai/api/v1/chat/completions",
                 headers={
-                    "Authorization": f"Bearer {settings.OPENROUTER_API_KEY}",
+                    "Authorization": f"Bearer {key}",
                     "HTTP-Referer": settings.BACKEND_URL,
                     "X-Title": "PromptVault Pro",
                 },
@@ -64,14 +65,15 @@ async def _call_openrouter(system: str, user_msg: str) -> str | None:
         return None
 
 
-async def _call_groq(system: str, user_msg: str) -> str | None:
-    if not settings.GROQ_API_KEY:
+async def _call_groq(system: str, user_msg: str, api_key: str | None = None) -> str | None:
+    key = api_key or settings.GROQ_API_KEY
+    if not key:
         return None
     try:
         async with httpx.AsyncClient(timeout=5.0) as client:
             response = await client.post(
                 "https://api.groq.com/openai/v1/chat/completions",
-                headers={"Authorization": f"Bearer {settings.GROQ_API_KEY}"},
+                headers={"Authorization": f"Bearer {key}"},
                 json={
                     "model": GROQ_MODEL,
                     "messages": [
@@ -137,7 +139,7 @@ def _rule_based_refine(body: str, style: str) -> tuple[str, str]:
 # ---------------------------------------------------------------------------
 
 
-async def refine_prompt(request: RefineRequest) -> RefineResponse:
+async def refine_prompt(request: RefineRequest, groq_key: str | None = None, openrouter_key: str | None = None) -> RefineResponse:
     style_instruction = STYLE_INSTRUCTIONS.get(request.style, STYLE_INSTRUCTIONS["professional"])
     if request.custom_instruction:
         style_instruction += f" Additional instruction: {request.custom_instruction}"
@@ -156,9 +158,9 @@ async def refine_prompt(request: RefineRequest) -> RefineResponse:
     score_before = original_score_data["total"]
 
     # Try provider chain
-    raw_response: str | None = await _call_openrouter(system_prompt, user_message)
+    raw_response: str | None = await _call_openrouter(system_prompt, user_message, openrouter_key)
     if raw_response is None:
-        raw_response = await _call_groq(system_prompt, user_message)
+        raw_response = await _call_groq(system_prompt, user_message, groq_key)
 
     refined_body: str
     explanation: str
@@ -201,16 +203,16 @@ async def score_prompt_service(body: str) -> ScoreResponse:
     return ScoreResponse(score=result["total"], breakdown=result["breakdown"])
 
 
-async def suggest_tags(body: str) -> SuggestTagsResponse:
+async def suggest_tags(body: str, groq_key: str | None = None, openrouter_key: str | None = None) -> SuggestTagsResponse:
     system_prompt = (
         "You are a tagging assistant. Given a prompt, suggest 3-6 concise, lowercase tags "
         "that describe its topic, domain, and style. Return ONLY a JSON array of strings. "
         "Example: [\"writing\", \"email\", \"professional\"]"
     )
 
-    raw: str | None = await _call_openrouter(system_prompt, body)
+    raw: str | None = await _call_openrouter(system_prompt, body, openrouter_key)
     if raw is None:
-        raw = await _call_groq(system_prompt, body)
+        raw = await _call_groq(system_prompt, body, groq_key)
 
     if raw is not None:
         try:

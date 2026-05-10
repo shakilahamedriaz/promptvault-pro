@@ -139,11 +139,11 @@ async function detectPlatform() {
     const url = tab.url;
     let platform = 'unknown';
 
-    if (url.includes('chat.openai.com')) platform = 'ChatGPT';
+    if (url.includes('chat.openai.com') || url.includes('chatgpt.com')) platform = 'ChatGPT';
     else if (url.includes('claude.ai')) platform = 'Claude';
     else if (url.includes('gemini.google.com')) platform = 'Gemini';
     else if (url.includes('perplexity.ai')) platform = 'Perplexity';
-    else if (url.includes('grok.x.com')) platform = 'Grok';
+    else if (url.includes('grok.com') || url.includes('grok.x.com')) platform = 'Grok';
     else if (url.includes('copilot.microsoft.com')) platform = 'Copilot';
 
     if (platform !== 'unknown') {
@@ -163,11 +163,11 @@ async function loadPrompts() {
   try {
     const res = await sendMsg('GET_PROMPTS');
     allPrompts = res?.prompts || [];
-    applyFiltersAndRender();
   } catch (err) {
-    showToast('Failed to load prompts', 'error');
     console.error('[PV] loadPrompts:', err);
+    allPrompts = [];
   }
+  applyFiltersAndRender();
 }
 
 function applyFiltersAndRender() {

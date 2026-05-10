@@ -15,6 +15,7 @@ from app.schemas.auth import (
     RefreshRequest,
     RegisterRequest,
     TokenResponse,
+    UpdateUserRequest,
     UserResponse,
 )
 from app.services import auth_service
@@ -57,6 +58,33 @@ async def get_me(
 ):
     """Return the currently authenticated user's profile."""
     return await auth_service.get_user_by_id(db, user_id)
+
+
+@router.put("/me", response_model=UserResponse)
+async def update_me(
+    data: UpdateUserRequest,
+    user_id: UUID = Depends(get_current_user_id),
+    db: AsyncSession = Depends(get_db),
+):
+    """Update the current user's profile and API keys."""
+    from sqlalchemy import select
+    result = await db.execute(select(User).where(User.id == user_id))
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found.")
+
+    if data.display_name is not None:
+        user.display_name = data.display_name
+    if data.avatar_url is not None:
+        user.avatar_url = data.avatar_url
+    if data.groq_api_key is not None:
+        user.groq_api_key = data.groq_api_key
+    if data.openrouter_api_key is not None:
+        user.openrouter_api_key = data.openrouter_api_key
+
+    await db.commit()
+    await db.refresh(user)
+    return user
 
 
 @router.get("/google")

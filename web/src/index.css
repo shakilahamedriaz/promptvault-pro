@@ -1,0 +1,107 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── CSS Variables for theming ─────────────────────────────────────────────── */
+
+:root {
+  --color-bg: theme('colors.gray.950');
+  --color-surface: theme('colors.gray.900');
+  --color-border: theme('colors.gray.800');
+  --color-text: theme('colors.gray.100');
+  --color-text-muted: theme('colors.gray.400');
+}
+
+.light {
+  --color-bg: theme('colors.gray.50');
+  --color-surface: theme('colors.white');
+  --color-border: theme('colors.gray.200');
+  --color-text: theme('colors.gray.900');
+  --color-text-muted: theme('colors.gray.500');
+}
+
+/* ── Base resets ────────────────────────────────────────────────────────────── */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', system-ui, sans-serif;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.5;
+  min-height: 100dvh;
+}
+
+/* ── Scrollbar styling ─────────────────────────────────────────────────────── */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: theme('colors.gray.700');
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: theme('colors.gray.600');
+}
+
+/* ── Focus ring ─────────────────────────────────────────────────────────────── */
+
+:focus-visible {
+  outline: 2px solid theme('colors.brand.500');
+  outline-offset: 2px;
+}
+
+/* ── Selection ──────────────────────────────────────────────────────────────── */
+
+::selection {
+  background-color: theme('colors.brand.600');
+  color: white;
+}
+
+/* ── Utility overrides ─────────────────────────────────────────────────────── */
+
+.font-mono {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+/* ── React Diff Viewer dark mode override ──────────────────────────────────── */
+
+.dark [class*="diff-viewer"] pre,
+.dark [class*="diff-viewer"] td {
+  font-family: 'JetBrains Mono', monospace !important;
+  font-size: 12px !important;
+  line-height: 1.6 !important;
+}
+
+/* ── Recharts tooltip ───────────────────────────────────────────────────────── */
+
+.recharts-tooltip-wrapper {
+  outline: none !important;
+}
+
+/* ── Animation utilities ────────────────────────────────────────────────────── */
+
+@layer utilities {
+  .animate-in {
+    animation: fadeIn 0.2s ease-out;
+  }
+}

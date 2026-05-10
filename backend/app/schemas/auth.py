@@ -41,3 +41,10 @@ class UserResponse(BaseModel):
     created_at: datetime
 
     model_config = {"from_attributes": True}
+
+
+class UpdateUserRequest(BaseModel):
+    display_name: str | None = Field(None, min_length=1, max_length=100)
+    avatar_url: str | None = None
+    groq_api_key: str | None = None
+    openrouter_api_key: str | None = None

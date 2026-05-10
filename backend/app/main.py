@@ -28,10 +28,15 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS
+# CORS — allow configured frontend + all localhost ports for dev
+_cors_origins = [settings.FRONTEND_URL]
+if "localhost" in settings.FRONTEND_URL:
+    for port in range(5173, 5180):
+        _cors_origins.append(f"http://localhost:{port}")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[settings.FRONTEND_URL],
+    allow_origins=_cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

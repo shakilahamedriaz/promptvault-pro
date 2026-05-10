@@ -27,6 +27,8 @@ class User(Base):
     )
     last_login_at = Column(TIMESTAMP(timezone=True), nullable=True)
     is_active = Column(Boolean, nullable=False, default=True, server_default=text("true"))
+    groq_api_key = Column(String(255), nullable=True)
+    openrouter_api_key = Column(String(255), nullable=True)
 
     # Relationships
     prompts = relationship("Prompt", back_populates="user", lazy="select")

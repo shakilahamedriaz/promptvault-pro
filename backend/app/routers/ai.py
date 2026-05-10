@@ -1,11 +1,13 @@
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, status
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
 from app.middleware.auth_middleware import get_current_user_id
 from app.middleware.rate_limiter import ai_rate_limit
+from app.models.user import User
 from app.schemas.ai import (
     FeedbackRequest,
     RefineRequest,
@@ -21,6 +23,14 @@ from app.services import ai_service
 router = APIRouter(prefix="/ai", tags=["ai"])
 
 
+async def _get_user_keys(user_id: UUID, db: AsyncSession) -> tuple[str | None, str | None]:
+    result = await db.execute(select(User).where(User.id == user_id))
+    user = result.scalar_one_or_none()
+    if not user:
+        return None, None
+    return user.groq_api_key, user.openrouter_api_key
+
+
 @router.post(
     "/refine",
     response_model=RefineResponse,
@@ -32,8 +42,8 @@ async def refine_prompt(
     db: AsyncSession = Depends(get_db),
 ):
     """Refine a prompt using AI with provider fallback chain."""
-    response = await ai_service.refine_prompt(request)
-    # Persist refinement record
+    groq_key, openrouter_key = await _get_user_keys(user_id, db)
+    response = await ai_service.refine_prompt(request, groq_key=groq_key, openrouter_key=openrouter_key)
     await ai_service.save_refinement(db, request, response)
     return response
 
@@ -59,9 +69,11 @@ async def score_prompt(
 async def suggest_tags(
     request: SuggestTagsRequest,
     user_id: UUID = Depends(get_current_user_id),
+    db: AsyncSession = Depends(get_db),
 ):
     """Suggest relevant tags for a given prompt body."""
-    return await ai_service.suggest_tags(request.body)
+    groq_key, openrouter_key = await _get_user_keys(user_id, db)
+    return await ai_service.suggest_tags(request.body, groq_key=groq_key, openrouter_key=openrouter_key)
 
 
 @router.get("/refinements/{prompt_id}", response_model=list[RefinementHistoryItem])
