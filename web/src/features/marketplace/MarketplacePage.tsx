@@ -757,52 +757,55 @@ function HeroBanner({ search, onSearch }: { search: string; onSearch: (v: string
 
   return (
     <div className="relative overflow-hidden border-b" style={{ borderColor: 'var(--color-border)' }}>
-      {/* Gradient background */}
       <div className="absolute inset-0 bg-gradient-to-br from-brand-600/8 via-violet-500/5 to-transparent pointer-events-none" />
       <div className="absolute -top-20 -right-20 h-72 w-72 rounded-full bg-brand-400/10 blur-3xl pointer-events-none" />
 
-      <div className="relative px-8 py-10">
-        <div className="flex items-start justify-between mb-6">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <GlobeAltIcon className="h-5 w-5 text-brand-500" />
-              <span className="text-[11px] font-bold uppercase tracking-widest text-brand-500">Global Marketplace</span>
-            </div>
-            <h1 className="text-[26px] font-extrabold tracking-tight text-gray-900 leading-tight">
-              Explore the World's Best Prompts
-            </h1>
-            <p className="text-[14px] text-gray-500 mt-1 max-w-lg">
-              Community-crafted, expert-reviewed. Import any prompt into your library in one click.
-            </p>
-          </div>
+      <div className="relative px-8 py-7 flex items-start justify-between gap-8">
 
-          {/* Stats */}
-          <div className="hidden lg:flex gap-6 text-right shrink-0">
-            {[
-              { label: 'Prompts', value: `${total}+` },
-              { label: 'Free', value: `${freeCount}` },
-              { label: 'Downloads', value: `${fmtDownloads(totalDownloads)}+` },
-            ].map(s => (
-              <div key={s.label}>
-                <p className="text-[20px] font-extrabold text-gray-900">{s.value}</p>
-                <p className="text-[11px] text-gray-400 font-medium">{s.label}</p>
+        {/* Left: badge + title + subtitle + search */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-1.5 mb-2">
+            <GlobeAltIcon className="h-4 w-4 text-brand-500" />
+            <span className="text-[11px] font-bold uppercase tracking-widest text-brand-500">Global Marketplace</span>
+          </div>
+          <h1 className="text-[22px] font-extrabold tracking-tight text-gray-900 leading-tight">
+            Explore the World's Best Prompts
+          </h1>
+          <p className="text-[13px] text-gray-500 mt-1">
+            Community-crafted, expert-reviewed. Import any prompt into your library in one click.
+          </p>
+
+          {/* Search bar */}
+          <div className="relative mt-4 max-w-[560px]">
+            <MagnifyingGlassIcon className="absolute left-4 top-1/2 h-[18px] w-[18px] -translate-y-1/2 text-gray-400 pointer-events-none" />
+            <input
+              type="search"
+              value={search}
+              onChange={e => onSearch(e.target.value)}
+              placeholder="Search prompts, categories, use cases…"
+              className="w-full rounded-xl border bg-white py-2.5 pl-11 pr-4 text-[13.5px] text-gray-800 placeholder-gray-400 shadow-sm transition-all focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
+              style={{ borderColor: 'var(--color-border-strong)' }}
+            />
+          </div>
+        </div>
+
+        {/* Right: stats pinned to top-right */}
+        <div className="shrink-0 flex items-start gap-5 pt-1">
+          {[
+            { label: 'Prompts',   value: `${total}+` },
+            { label: 'Free',      value: `${freeCount}` },
+            { label: 'Downloads', value: `${fmtDownloads(totalDownloads)}+` },
+          ].map((s, i) => (
+            <div key={s.label} className="flex items-start gap-5">
+              {i > 0 && <div className="h-8 w-px bg-gray-200 mt-1" />}
+              <div className="text-right">
+                <p className="text-[18px] font-extrabold text-gray-900 leading-none">{s.value}</p>
+                <p className="text-[11px] text-gray-400 font-medium mt-1">{s.label}</p>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
 
-        {/* Search bar */}
-        <div className="relative max-w-xl">
-          <MagnifyingGlassIcon className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
-          <input
-            type="search"
-            value={search}
-            onChange={e => onSearch(e.target.value)}
-            placeholder="Search prompts, categories, use cases…"
-            className="w-full rounded-2xl border bg-white/80 backdrop-blur py-3.5 pl-12 pr-4 text-[14px] text-gray-800 placeholder-gray-400 shadow-sm transition-all focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-100"
-            style={{ borderColor: 'var(--color-border-strong)' }}
-          />
-        </div>
       </div>
     </div>
   );

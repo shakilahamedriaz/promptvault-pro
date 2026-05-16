@@ -10,7 +10,7 @@ export function useAuth() {
   const handleLogin = useCallback(
     async (email: string, password: string) => {
       await login({ email, password });
-      navigate('/library', { replace: true });
+      navigate('/', { replace: true });
     },
     [login, navigate],
   );
@@ -18,7 +18,7 @@ export function useAuth() {
   const handleRegister = useCallback(
     async (email: string, password: string, displayName: string) => {
       await register({ email, password, display_name: displayName });
-      navigate('/library', { replace: true });
+      navigate('/', { replace: true });
     },
     [register, navigate],
   );

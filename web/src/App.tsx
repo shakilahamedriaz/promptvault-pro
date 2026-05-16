@@ -6,6 +6,7 @@ import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { LoginPage } from '@/features/auth/LoginPage';
 import { RegisterPage } from '@/features/auth/RegisterPage';
 import { GoogleCallbackPage } from '@/features/auth/GoogleCallbackPage';
+import { HomePage } from '@/features/home/HomePage';
 import { LibraryPage } from '@/features/library/LibraryPage';
 import { RefinerPage } from '@/features/refiner/RefinerPage';
 import { HistoryPage } from '@/features/history/HistoryPage';
@@ -55,7 +56,7 @@ export default function App() {
             </ProtectedRoute>
           }
         >
-          <Route index element={<Navigate to="/library" replace />} />
+          <Route index element={<HomePage />} />
           <Route path="library" element={<LibraryPage />} />
           <Route path="refiner" element={<RefinerPage />} />
           <Route path="history" element={<HistoryPage />} />
@@ -65,7 +66,7 @@ export default function App() {
         </Route>
 
         {/* Catch-all */}
-        <Route path="*" element={<Navigate to="/library" replace />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   );

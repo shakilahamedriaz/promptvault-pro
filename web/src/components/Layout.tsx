@@ -1,6 +1,7 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { clsx } from 'clsx';
 import {
+  HomeIcon,
   BookOpenIcon,
   SparklesIcon,
   ClockIcon,
@@ -12,12 +13,13 @@ import {
 import { useAuthStore } from '@/store/authStore';
 
 const navItems = [
-  { to: '/library', label: 'Library', icon: BookOpenIcon },
-  { to: '/refiner', label: 'AI Refiner', icon: SparklesIcon },
-  { to: '/marketplace', label: 'Explore', icon: GlobeAltIcon },
-  { to: '/history', label: 'History', icon: ClockIcon },
-  { to: '/analytics', label: 'Analytics', icon: ChartBarIcon },
-  { to: '/settings', label: 'Settings', icon: Cog6ToothIcon },
+  { to: '/',           label: 'Home',      icon: HomeIcon,     end: true  },
+  { to: '/library',    label: 'Library',   icon: BookOpenIcon, end: false },
+  { to: '/refiner',    label: 'AI Refiner',icon: SparklesIcon, end: false },
+  { to: '/marketplace',label: 'Explore',   icon: GlobeAltIcon, end: false },
+  { to: '/history',    label: 'History',   icon: ClockIcon,    end: false },
+  { to: '/analytics',  label: 'Analytics', icon: ChartBarIcon, end: false },
+  { to: '/settings',   label: 'Settings',  icon: Cog6ToothIcon,end: false },
 ];
 
 export function Layout() {
@@ -61,10 +63,11 @@ export function Layout() {
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto px-2.5 py-3">
           <ul className="space-y-0.5">
-            {navItems.map(({ to, label, icon: Icon }) => (
+            {navItems.map(({ to, label, icon: Icon, end }) => (
               <li key={to}>
                 <NavLink
                   to={to}
+                  end={end}
                   className={({ isActive }) =>
                     clsx(
                       'flex items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] font-medium transition-all duration-150',
