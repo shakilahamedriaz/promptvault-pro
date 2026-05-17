@@ -1,5 +1,5 @@
 /**
- * PromptVault Pro – paste_engine.js
+ * Prompt Verse – paste_engine.js
  * Listens for PASTE_PROMPT messages and injects text into the current platform's input.
  * Runs as a content script (non-module). All platform logic is inlined.
  * Platform-specific injectors register themselves as window.__pv_inject via their own scripts.
@@ -170,16 +170,23 @@
         sendResponse({ ok: false, error: 'Empty text' });
         return false;
       }
-
       detectAndInject(text).then((ok) => {
         sendResponse({ ok });
       }).catch((err) => {
         console.error('[PV] paste_engine error:', err);
         sendResponse({ ok: false, error: err.message });
       });
-
-      return true; // async response
+      return true;
     }
+
+    if (message.type === 'GET_INPUT_TEXT') {
+      const text = typeof window.__pv_read_input === 'function'
+        ? window.__pv_read_input()
+        : '';
+      sendResponse({ text: text.trim() });
+      return false;
+    }
+
     return false;
   });
 

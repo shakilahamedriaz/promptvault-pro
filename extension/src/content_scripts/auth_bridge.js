@@ -1,5 +1,5 @@
 /**
- * PromptVault Pro – auth_bridge.js
+ * Prompt Verse – auth_bridge.js
  * Runs on localhost:5173. Syncs auth token to the extension automatically.
  */
 (function () {

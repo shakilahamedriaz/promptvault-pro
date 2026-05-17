@@ -43,7 +43,7 @@ interface PromptCardProps {
 
 function PromptCard({ prompt, onEdit, onDelete, onToggleFavorite, onTogglePublish, onCopy }: PromptCardProps) {
   const scoreColor =
-    prompt.quality_score === null
+    prompt.quality_score == null
       ? 'text-gray-400'
       : prompt.quality_score >= 70
         ? 'text-green-600'
@@ -64,7 +64,7 @@ function PromptCard({ prompt, onEdit, onDelete, onToggleFavorite, onTogglePublis
             <span className="rounded-full bg-brand-50 border border-brand-100 px-2 py-0.5 text-[11px] font-medium text-brand-600">
               {prompt.category || 'General'}
             </span>
-            {prompt.quality_score !== null && (
+            {prompt.quality_score != null && (
               <span className={clsx('text-xs font-medium', scoreColor)}>
                 Score: {prompt.quality_score}
               </span>

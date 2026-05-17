@@ -10,7 +10,6 @@ import {
   ArrowTrendingUpIcon,
   DocumentDuplicateIcon,
   ChartBarIcon,
-  StarIcon,
 } from '@heroicons/react/24/outline';
 import { StarIcon as StarSolid } from '@heroicons/react/24/solid';
 import { clsx } from 'clsx';

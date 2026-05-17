@@ -1,4 +1,4 @@
-/** PromptVault Pro – popup.js */
+/** Prompt Verse – popup.js */
 
 // ─── Messaging ────────────────────────────────────────────────────────────────
 

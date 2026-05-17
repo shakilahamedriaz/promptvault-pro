@@ -1,5 +1,6 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { clsx } from 'clsx';
+import { SkipLink } from '@/components/SkipLink';
 import {
   HomeIcon,
   BookOpenIcon,
@@ -37,6 +38,7 @@ export function Layout() {
 
   return (
     <div className="flex h-screen overflow-hidden" style={{ background: 'var(--color-bg)' }}>
+      <SkipLink />
 
       {/* ── Sidebar ───────────────────────────────────────────────────────── */}
       <aside
@@ -55,13 +57,12 @@ export function Layout() {
             <SparklesIcon className="h-[15px] w-[15px] text-white" />
           </div>
           <div>
-            <p className="text-[13px] font-bold tracking-tight text-gray-900 leading-none">PromptVault</p>
-            <p className="text-[10px] font-semibold text-brand-500 mt-0.5 tracking-wide uppercase">Pro</p>
+            <p className="text-[13px] font-bold tracking-tight text-gray-900 leading-none">Prompt Verse</p>
           </div>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto px-2.5 py-3">
+        <nav className="flex-1 overflow-y-auto px-2.5 py-3" aria-label="Main navigation">
           <ul className="space-y-0.5">
             {navItems.map(({ to, label, icon: Icon, end }) => (
               <li key={to}>
@@ -117,7 +118,7 @@ export function Layout() {
       </aside>
 
       {/* ── Main Content ──────────────────────────────────────────────────── */}
-      <main className="flex flex-1 flex-col overflow-hidden" style={{ background: 'var(--color-bg)' }}>
+      <main id="main-content" className="flex flex-1 flex-col overflow-hidden" style={{ background: 'var(--color-bg)' }}>
         <div className="flex-1 overflow-y-auto">
           <Outlet />
         </div>

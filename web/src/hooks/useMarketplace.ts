@@ -35,32 +35,39 @@ export interface MarketplaceFilters {
   min_use_count?: number;
 }
 
+interface MarketplaceResponse {
+  items: MarketplacePrompt[];
+  total: number;
+}
+
 export function useMarketplace(filters: MarketplaceFilters = {}) {
   const [prompts, setPrompts] = useState<MarketplacePrompt[]>([]);
   const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const { category, q, sort, page, per_page } = filters;
+
   const fetchPrompts = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
       const params = new URLSearchParams();
-      if (filters.category && filters.category !== "All") params.append("category", filters.category);
-      if (filters.q) params.append("q", filters.q);
-      if (filters.sort) params.append("sort", filters.sort);
-      if (filters.page) params.append("page", String(filters.page));
-      if (filters.per_page) params.append("per_page", String(filters.per_page));
-      
-      const response = await api.get(`/marketplace/prompts?${params.toString()}`);
-      setPrompts(response.data.items || []);
-      setTotal(response.data.total || 0);
-    } catch (err: any) {
-      setError(err.message);
+      if (category && category !== "All") params.append("category", category);
+      if (q) params.append("q", q);
+      if (sort) params.append("sort", sort);
+      if (page) params.append("page", String(page));
+      if (per_page) params.append("per_page", String(per_page));
+
+      const response = await api.get<MarketplaceResponse>(`/marketplace/prompts?${params.toString()}`);
+      setPrompts(response.items ?? []);
+      setTotal(response.total ?? 0);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to load marketplace");
     } finally {
       setIsLoading(false);
     }
-  }, [filters]);
+  }, [category, q, sort, page, per_page]); // primitives — stable refs, no blink loop
 
   useEffect(() => {
     fetchPrompts();
@@ -68,20 +75,18 @@ export function useMarketplace(filters: MarketplaceFilters = {}) {
 
   const forkPrompt = useCallback(async (id: string) => {
     try {
-      const response = await api.post(`/marketplace/prompts/${id}/fork`);
-      return response.data;
-    } catch (err: any) {
-      setError(err.message);
+      return await api.post<MarketplacePrompt>(`/marketplace/prompts/${id}/fork`);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to fork prompt");
       throw err;
     }
   }, []);
 
   const ratePrompt = useCallback(async (id: string, score: number) => {
     try {
-      const response = await api.post(`/marketplace/prompts/${id}/rate`, { score });
-      return response.data;
-    } catch (err: any) {
-      setError(err.message);
+      await api.post(`/marketplace/prompts/${id}/rate`, { score });
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to rate prompt");
       throw err;
     }
   }, []);
@@ -89,8 +94,8 @@ export function useMarketplace(filters: MarketplaceFilters = {}) {
   const favoritePrompt = useCallback(async (id: string) => {
     try {
       await api.post(`/marketplace/prompts/${id}/favorite`);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to favorite prompt");
       throw err;
     }
   }, []);
@@ -98,16 +103,16 @@ export function useMarketplace(filters: MarketplaceFilters = {}) {
   const unfavoritePrompt = useCallback(async (id: string) => {
     try {
       await api.delete(`/marketplace/prompts/${id}/favorite`);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to unfavorite prompt");
       throw err;
     }
   }, []);
 
-  const checkFavorited = useCallback(async (id: string) => {
+  const checkFavorited = useCallback(async (id: string): Promise<boolean> => {
     try {
-      const response = await api.get(`/marketplace/prompts/${id}/is-favorited`);
-      return response.data.is_favorited;
+      const response = await api.get<{ is_favorited: boolean }>(`/marketplace/prompts/${id}/is-favorited`);
+      return response.is_favorited;
     } catch {
       return false;
     }

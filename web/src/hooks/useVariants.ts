@@ -24,10 +24,10 @@ export function useVariants(promptId: string) {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await api.get(`/marketplace/prompts/${promptId}/variants`);
-      setVariants(response.data);
-    } catch (err: any) {
-      setError(err.message);
+      const response = await api.get<VariantsData>(`/marketplace/prompts/${promptId}/variants`);
+      setVariants(response);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to load variants");
     } finally {
       setIsLoading(false);
     }

@@ -1,5 +1,5 @@
 /**
- * PromptVault Pro – local_store.js
+ * Prompt Verse – local_store.js
  * Offline-first storage layer.
  *   • chrome.storage.local  → prompts + settings  (fast, large quota)
  *   • IndexedDB             → history + sync_queue (unbounded large data)

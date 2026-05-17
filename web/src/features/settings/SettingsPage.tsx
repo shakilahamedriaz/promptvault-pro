@@ -1,15 +1,13 @@
 import { useState, useRef, ChangeEvent } from 'react';
 import {
   UserCircleIcon,
-  KeyIcon,
   ArrowDownTrayIcon,
   ArrowUpTrayIcon,
   SunIcon,
   MoonIcon,
+  ComputerDesktopIcon,
   TrashIcon,
   CheckIcon,
-  EyeIcon,
-  EyeSlashIcon,
 } from '@heroicons/react/24/outline';
 import { clsx } from 'clsx';
 import { Button } from '@/components/Button';
@@ -33,88 +31,7 @@ function Section({ title, description, children, className = '' }: { title: stri
   );
 }
 
-// ─── API Key Field ────────────────────────────────────────────────────────────
-
-interface ApiKeyFieldProps {
-  label: string;
-  provider: string;
-  currentKey: string;
-  onSave: (provider: string, key: string) => Promise<void>;
-  isSaving: boolean;
-}
-
-function ApiKeyField({ label, provider, currentKey, onSave, isSaving }: ApiKeyFieldProps) {
-  const [value, setValue] = useState(currentKey ? '•'.repeat(20) : '');
-  const [isEditing, setIsEditing] = useState(false);
-  const [showKey, setShowKey] = useState(false);
-
-  const handleEdit = () => {
-    setValue('');
-    setIsEditing(true);
-  };
-
-  const handleSave = async () => {
-    if (!value.trim()) return;
-    await onSave(provider, value.trim());
-    setValue('•'.repeat(20));
-    setIsEditing(false);
-    setShowKey(false);
-  };
-
-  const handleCancel = () => {
-    setValue(currentKey ? '•'.repeat(20) : '');
-    setIsEditing(false);
-  };
-
-  return (
-    <div className="flex items-end gap-2">
-      <div className="flex-1">
-        <label className="block text-xs font-medium text-gray-700 mb-1">{label}</label>
-        <div className="relative">
-          <input
-            type={showKey && isEditing ? 'text' : 'password'}
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-            readOnly={!isEditing}
-            placeholder={isEditing ? `Paste your ${label} API key` : 'Not configured'}
-            className={clsx(
-              'block w-full rounded-lg border px-2.5 py-2 text-xs placeholder-gray-400 focus:outline-none focus:ring-1',
-              isEditing
-                ? 'border-brand-400 bg-white text-gray-900 focus:ring-brand-200'
-                : 'border-gray-200 bg-gray-50 text-gray-400 cursor-default',
-            )}
-          />
-          {isEditing && (
-            <button
-              type="button"
-              onClick={() => setShowKey((v) => !v)}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-            >
-              {showKey ? <EyeSlashIcon className="h-3.5 w-3.5" /> : <EyeIcon className="h-3.5 w-3.5" />}
-            </button>
-          )}
-        </div>
-      </div>
-      {isEditing ? (
-        <div className="flex gap-1">
-          <Button variant="ghost" size="sm" onClick={handleCancel}>Cancel</Button>
-          <Button variant="primary" size="sm" onClick={handleSave} isLoading={isSaving}>Save</Button>
-        </div>
-      ) : (
-        <Button variant="outline" size="sm" onClick={handleEdit}>
-          {currentKey ? 'Update' : 'Add'}
-        </Button>
-      )}
-    </div>
-  );
-}
-
 // ─── Settings Page ────────────────────────────────────────────────────────────
-
-interface ApiKeys {
-  openrouter: string;
-  groq: string;
-}
 
 export function SettingsPage() {
   const { user, updateUser } = useAuthStore();
@@ -122,9 +39,6 @@ export function SettingsPage() {
 
   const [displayName, setDisplayName] = useState(user?.display_name || '');
   const [isSavingProfile, setIsSavingProfile] = useState(false);
-
-  const [apiKeys, setApiKeys] = useState<ApiKeys>({ openrouter: '', groq: '' });
-  const [savingKey, setSavingKey] = useState<string | null>(null);
 
   const [isExporting, setIsExporting] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
@@ -147,19 +61,6 @@ export function SettingsPage() {
     }
   };
 
-  const handleSaveApiKey = async (provider: string, key: string) => {
-    setSavingKey(provider);
-    try {
-      await api.put('/auth/me', { [`${provider}_api_key`]: key });
-      setApiKeys((prev) => ({ ...prev, [provider]: key }));
-      showToast.success(`${provider.charAt(0).toUpperCase() + provider.slice(1)} API key saved!`);
-    } catch {
-      showToast.error('Failed to save API key.');
-    } finally {
-      setSavingKey(null);
-    }
-  };
-
   const handleExport = async (format: 'json' | 'csv') => {
     setIsExporting(true);
     try {
@@ -169,7 +70,7 @@ export function SettingsPage() {
       const url = URL.createObjectURL(response as unknown as Blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `promptvault-export-${new Date().toISOString().slice(0, 10)}.${format}`;
+      a.download = `prompt-verse-export-${new Date().toISOString().slice(0, 10)}.${format}`;
       a.click();
       URL.revokeObjectURL(url);
       showToast.success(`Exported as ${format.toUpperCase()}!`);
@@ -218,7 +119,7 @@ export function SettingsPage() {
       {/* ── Header ──────────────────────────────────────────────────────── */}
       <div className="border-b bg-white px-5 py-3" style={{ borderColor: 'var(--color-border)' }}>
         <h1 className="text-base font-bold tracking-tight text-gray-900">Settings</h1>
-        <p className="text-xs text-gray-500 mt-0.5">Manage your account, preferences & API keys</p>
+        <p className="text-xs text-gray-500 mt-0.5">Manage your account and preferences</p>
       </div>
 
       {/* ── Body ────────────────────────────────────────────────────────── */}
@@ -230,10 +131,15 @@ export function SettingsPage() {
             {/* Appearance */}
             <Section title="Appearance" description="Color theme">
               <div className="flex gap-2">
-                {(['light', 'dark'] as const).map((t) => (
+                {([
+                  { value: 'light', label: 'Light', icon: SunIcon },
+                  { value: 'dark',  label: 'Dark',  icon: MoonIcon },
+                  { value: 'auto',  label: 'Auto',  icon: ComputerDesktopIcon },
+                ] as const).map(({ value: t, label, icon: Icon }) => (
                   <button
                     key={t}
                     onClick={() => setTheme(t)}
+                    aria-pressed={theme === t}
                     className={clsx(
                       'flex-1 flex items-center justify-center gap-1.5 rounded-lg border py-2 text-xs font-medium transition-colors',
                       theme === t
@@ -241,8 +147,8 @@ export function SettingsPage() {
                         : 'border-gray-200 bg-white text-gray-500 hover:border-gray-300',
                     )}
                   >
-                    {t === 'dark' ? <MoonIcon className="h-3.5 w-3.5" /> : <SunIcon className="h-3.5 w-3.5" />}
-                    {t.charAt(0).toUpperCase()}
+                    <Icon className="h-3.5 w-3.5" />
+                    {label}
                     {theme === t && <CheckIcon className="h-3 w-3" />}
                   </button>
                 ))}
@@ -311,37 +217,6 @@ export function SettingsPage() {
               </div>
             </Section>
           </div>
-
-          {/* API Keys */}
-          <Section
-            title="API Keys"
-            description="Connect AI provider keys (Pro feature)"
-          >
-            <div className="space-y-3">
-              <div className="flex items-start gap-1.5 rounded-lg bg-brand-50 border border-brand-100 px-3 py-2">
-                <KeyIcon className="mt-0.5 h-3 w-3 shrink-0 text-brand-600" />
-                <p className="text-xs text-brand-700">
-                  Keys are encrypted & never logged. Bring your own for unlimited refinements.
-                </p>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <ApiKeyField
-                  label="OpenRouter"
-                  provider="openrouter"
-                  currentKey={apiKeys.openrouter}
-                  onSave={handleSaveApiKey}
-                  isSaving={savingKey === 'openrouter'}
-                />
-                <ApiKeyField
-                  label="Groq"
-                  provider="groq"
-                  currentKey={apiKeys.groq}
-                  onSave={handleSaveApiKey}
-                  isSaving={savingKey === 'groq'}
-                />
-              </div>
-            </div>
-          </Section>
 
           {/* Export / Import */}
           <div className="grid grid-cols-2 gap-4">

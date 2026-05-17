@@ -6,6 +6,7 @@ export interface EarningsSummary {
   this_month: number;
   this_week: number;
   avg_price: number;
+  total_sales_count?: number;
 }
 
 export interface TopPrompt {
@@ -13,6 +14,7 @@ export interface TopPrompt {
   title: string;
   revenue: number;
   sales_count: number;
+  avg_rating?: number;
 }
 
 export interface Payout {
@@ -34,16 +36,16 @@ export function useEarnings() {
     setError(null);
     try {
       const [summaryRes, topRes, payoutRes] = await Promise.all([
-        api.get("/creator/earnings/summary"),
-        api.get("/creator/earnings/top-prompts"),
-        api.get("/creator/payouts"),
+        api.get<EarningsSummary>("/creator/earnings/summary"),
+        api.get<{ items: TopPrompt[] }>("/creator/earnings/top-prompts"),
+        api.get<{ items: Payout[] }>("/creator/payouts"),
       ]);
 
-      setSummary(summaryRes.data);
-      setTopPrompts(topRes.data.items || []);
-      setPayouts(payoutRes.data.items || []);
-    } catch (err: any) {
-      setError(err.message);
+      setSummary(summaryRes);
+      setTopPrompts(topRes.items ?? []);
+      setPayouts(payoutRes.items ?? []);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to load earnings");
     } finally {
       setIsLoading(false);
     }

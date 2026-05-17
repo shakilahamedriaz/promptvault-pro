@@ -1,7 +1,12 @@
 import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuthStore } from "@/store/authStore";
+import { useAuthStore, type User } from "@/store/authStore";
 import { api, tokenStore } from "@/api/client";
+
+interface AuthResponse {
+  access_token: string;
+  user: User;
+}
 
 export function useAuth() {
   const navigate = useNavigate();
@@ -12,18 +17,14 @@ export function useAuth() {
     clearError();
     setIsLoading(true);
     try {
-      const response = await api.post("/auth/login", { email, password });
-      const { access_token, user } = response;
-
-      // Store token in both localStorage and tokenStore
+      const { access_token, user } = await api.post<AuthResponse>("/auth/login", { email, password });
       localStorage.setItem("token", access_token);
       tokenStore.set(access_token);
       setUser(user);
-
-      // Redirect to home
       navigate("/");
-    } catch (err: any) {
-      const message = err.response?.data?.detail || err.message || "Login failed";
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { detail?: string } }; message?: string };
+      const message = axiosErr.response?.data?.detail ?? axiosErr.message ?? "Login failed";
       setError(message);
       throw err;
     } finally {
@@ -35,15 +36,14 @@ export function useAuth() {
     clearError();
     setIsLoading(true);
     try {
-      const response = await api.post("/auth/register", { email, password, display_name: displayName });
-      const { access_token, user } = response;
-
+      const { access_token, user } = await api.post<AuthResponse>("/auth/register", { email, password, display_name: displayName });
       localStorage.setItem("token", access_token);
       tokenStore.set(access_token);
       setUser(user);
       navigate("/");
-    } catch (err: any) {
-      const message = err.response?.data?.detail || err.message || "Registration failed";
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { detail?: string } }; message?: string };
+      const message = axiosErr.response?.data?.detail ?? axiosErr.message ?? "Registration failed";
       setError(message);
       throw err;
     } finally {
@@ -54,15 +54,14 @@ export function useAuth() {
   const loginWithGoogle = useCallback(async (code: string) => {
     setIsLoading(true);
     try {
-      const response = await api.post("/auth/google-callback", { code });
-      const { access_token, user } = response;
-
+      const { access_token, user } = await api.post<AuthResponse>("/auth/google-callback", { code });
       localStorage.setItem("token", access_token);
       tokenStore.set(access_token);
       setUser(user);
       navigate("/");
-    } catch (err: any) {
-      const message = err.response?.data?.detail || err.message || "Google login failed";
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { detail?: string } }; message?: string };
+      const message = axiosErr.response?.data?.detail ?? axiosErr.message ?? "Google login failed";
       setError(message);
       throw err;
     } finally {

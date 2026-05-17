@@ -102,9 +102,8 @@ async def get_marketplace_prompts_query(
         stmt = stmt.where(Prompt.tags.overlap(tags))
 
     if q:
-        # Full-text search
         stmt = stmt.where(
-            func.to_tsvector("english", Prompt.title + " " + Prompt.body).match(
+            func.to_tsvector("english", Prompt.title + " " + Prompt.body).op("@@")(
                 func.plainto_tsquery("english", q)
             )
         )
@@ -156,7 +155,7 @@ async def list_marketplace_prompts(
         total_stmt = total_stmt.where(Prompt.tags.overlap(tags))
     if q:
         total_stmt = total_stmt.where(
-            func.to_tsvector("english", Prompt.title + " " + Prompt.body).match(
+            func.to_tsvector("english", Prompt.title + " " + Prompt.body).op("@@")(
                 func.plainto_tsquery("english", q)
             )
         )
@@ -190,7 +189,7 @@ async def list_marketplace_prompts(
         stmt = stmt.where(Prompt.tags.overlap(tags))
     if q:
         stmt = stmt.where(
-            func.to_tsvector("english", Prompt.title + " " + Prompt.body).match(
+            func.to_tsvector("english", Prompt.title + " " + Prompt.body).op("@@")(
                 func.plainto_tsquery("english", q)
             )
         )

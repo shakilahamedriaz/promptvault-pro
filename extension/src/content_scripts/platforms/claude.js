@@ -1,5 +1,5 @@
 /**
- * PromptVault Pro – Claude.ai platform injector
+ * Prompt Verse – Claude.ai platform injector
  */
 (function () {
   'use strict';

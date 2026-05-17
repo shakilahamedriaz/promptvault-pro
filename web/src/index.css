@@ -70,19 +70,19 @@ body {
 /* ── Recharts ───────────────────────────────────────────────────────────────── */
 .recharts-tooltip-wrapper { outline: none !important; }
 .recharts-tooltip-content {
-  background: #ffffff !important;
-  border: 1px solid #E4E2EE !important;
+  background: var(--color-surface) !important;
+  border: 1px solid var(--color-border) !important;
   border-radius: 10px !important;
   box-shadow: 0 4px 16px rgba(0,0,0,0.10) !important;
   padding: 10px 14px !important;
   font-size: 13px !important;
-  color: #1a1a2e !important;
+  color: var(--color-text) !important;
 }
 
 /* ── Card ───────────────────────────────────────────────────────────────────── */
 .pv-card {
-  background: #ffffff;
-  border: 1px solid #E4E2EE;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: 14px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.06);
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
@@ -94,8 +94,8 @@ body {
 
 /* ── Stat card ──────────────────────────────────────────────────────────────── */
 .stat-card {
-  background: #ffffff;
-  border: 1px solid #E4E2EE;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: 14px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.06);
   padding: 20px 24px;
@@ -103,12 +103,12 @@ body {
 
 /* ── Input base ─────────────────────────────────────────────────────────────── */
 .pv-input {
-  background: #F8F7FF;
-  border: 1px solid #DDD9ED;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: 10px;
   padding: 10px 14px;
   font-size: 14px;
-  color: #0F0F1A;
+  color: var(--color-text);
   transition: border-color 0.15s, box-shadow 0.15s;
   width: 100%;
 }
@@ -117,7 +117,7 @@ body {
   outline: none;
   border-color: #A78BFA;
   box-shadow: 0 0 0 3px rgba(167,139,250,0.15);
-  background: #ffffff;
+  background: var(--color-surface);
 }
 
 /* ── Default input border color ─────────────────────────────────────────────── */

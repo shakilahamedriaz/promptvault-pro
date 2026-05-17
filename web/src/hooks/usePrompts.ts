@@ -8,12 +8,21 @@ export interface Prompt {
   category: string;
   tags: string[];
   use_count: number;
-  quality_score?: number;
+  quality_score?: number | null;
   description?: string;
   is_public?: boolean;
+  is_favorite?: boolean;
   price_credits?: number;
   created_at: string;
   updated_at: string;
+}
+
+export interface PromptVersion {
+  id: string;
+  prompt_id: string;
+  body: string;
+  version_number: number;
+  created_at: string;
 }
 
 export interface CreatePromptPayload {
@@ -31,6 +40,12 @@ export interface UsePromptsOptions {
   category?: string;
   sort?: SortOption;
   page?: number;
+}
+
+interface PromptsListResponse {
+  prompts: Prompt[];
+  items?: Prompt[];
+  total: number;
 }
 
 export function usePrompts(options: UsePromptsOptions = {}) {
@@ -51,11 +66,11 @@ export function usePrompts(options: UsePromptsOptions = {}) {
       params.append("page", String(page));
       params.append("per_page", "20");
 
-      const response = await api.get(`/prompts?${params.toString()}`);
-      setPrompts(response.items || []);
-      setTotal(response.total || 0);
-    } catch (err: any) {
-      setError(err.message);
+      const response = await api.get<PromptsListResponse>(`/prompts?${params.toString()}`);
+      setPrompts(response.prompts ?? response.items ?? []);
+      setTotal(response.total ?? 0);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to load prompts");
     } finally {
       setIsLoading(false);
     }
@@ -67,11 +82,11 @@ export function usePrompts(options: UsePromptsOptions = {}) {
 
   const createPrompt = useCallback(async (payload: CreatePromptPayload) => {
     try {
-      const response = await api.post("/prompts", payload);
-      setPrompts((prev) => [response, ...prev]);
-      return response;
-    } catch (err: any) {
-      setError(err.message);
+      const result = await api.post<Prompt>("/prompts", payload);
+      setPrompts((prev) => [result, ...prev]);
+      return result;
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to create prompt");
       throw err;
     }
   }, []);
@@ -80,19 +95,19 @@ export function usePrompts(options: UsePromptsOptions = {}) {
     try {
       await api.delete(`/prompts/${id}`);
       setPrompts((prev) => prev.filter((p) => p.id !== id));
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to delete prompt");
       throw err;
     }
   }, []);
 
   const updatePrompt = useCallback(async (id: string, payload: Partial<CreatePromptPayload>) => {
     try {
-      const response = await api.patch(`/prompts/${id}`, payload);
-      setPrompts((prev) => prev.map((p) => (p.id === id ? response : p)));
-      return response;
-    } catch (err: any) {
-      setError(err.message);
+      const result = await api.patch<Prompt>(`/prompts/${id}`, payload);
+      setPrompts((prev) => prev.map((p) => (p.id === id ? result : p)));
+      return result;
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to update prompt");
       throw err;
     }
   }, []);
@@ -100,18 +115,18 @@ export function usePrompts(options: UsePromptsOptions = {}) {
   const toggleFavorite = useCallback(async (id: string) => {
     try {
       await api.post(`/marketplace/prompts/${id}/favorite`);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to toggle favorite");
       throw err;
     }
   }, []);
 
-  const getVersions = useCallback(async (id: string) => {
+  const getVersions = useCallback(async (id: string): Promise<PromptVersion[]> => {
     try {
-      const response = await api.get(`/marketplace/prompts/${id}/variants`);
-      return response;
-    } catch (err: any) {
-      setError(err.message);
+      const response = await api.get<{ items: PromptVersion[] }>(`/prompts/${id}/versions`);
+      return response.items ?? [];
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to load versions");
       throw err;
     }
   }, []);

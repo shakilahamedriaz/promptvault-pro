@@ -3,7 +3,7 @@ import { useReviews } from '@/hooks/useReviews';
 import { useAuthStore } from '@/store/authStore';
 import { formatDistanceToNow } from 'date-fns';
 import { StarIcon, HandThumbUpIcon, HandThumbDownIcon } from '@heroicons/react/24/outline';
-import { StarIcon as StarSolid, HandThumbUpIcon as HandThumbUpSolid, HandThumbDownIcon as HandThumbDownSolid } from '@heroicons/react/24/solid';
+import { StarIcon as StarSolid } from '@heroicons/react/24/solid';
 import { Button } from '@/components/Button';
 import { EmptyState } from '@/components/EmptyState';
 import { clsx } from 'clsx';
@@ -178,7 +178,7 @@ export function ReviewsSection({ promptId }: ReviewsSectionProps) {
                   onClick={() => voteHelpful(review.id, true)}
                   className={clsx(
                     'flex items-center gap-1 text-xs px-2 py-1 rounded transition-colors',
-                    review.user_voted_helpful === true
+                    review.user_helpful === true
                       ? 'bg-green-100 text-green-700'
                       : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                   )}
@@ -190,7 +190,7 @@ export function ReviewsSection({ promptId }: ReviewsSectionProps) {
                   onClick={() => voteHelpful(review.id, false)}
                   className={clsx(
                     'flex items-center gap-1 text-xs px-2 py-1 rounded transition-colors',
-                    review.user_voted_helpful === false
+                    review.user_helpful === false
                       ? 'bg-red-100 text-red-700'
                       : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                   )}

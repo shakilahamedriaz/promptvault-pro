@@ -20,7 +20,7 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
       <div className="flex min-h-screen items-center justify-center bg-gray-950">
         <div className="flex flex-col items-center gap-4">
           <div className="h-10 w-10 animate-spin rounded-full border-4 border-brand-600 border-t-transparent" />
-          <p className="text-sm text-gray-400">Loading PromptVault Pro…</p>
+          <p className="text-sm text-gray-400">Loading Prompt Verse…</p>
         </div>
       </div>
     );

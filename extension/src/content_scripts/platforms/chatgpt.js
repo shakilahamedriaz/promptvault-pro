@@ -1,5 +1,5 @@
 /**
- * PromptVault Pro – ChatGPT platform injector
+ * Prompt Verse – ChatGPT platform injector
  * Handles both legacy <textarea> and current contenteditable <div> input.
  */
 (function () {

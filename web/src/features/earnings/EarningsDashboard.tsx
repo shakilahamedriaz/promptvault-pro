@@ -92,7 +92,7 @@ export function EarningsDashboard() {
         {/* Stats Row */}
         <div className="bg-white rounded-lg border p-4 mb-8">
           <p className="text-sm text-gray-600">
-            <span className="font-semibold text-gray-900">{summary.total_sales_count}</span> total sales across all prompts
+            <span className="font-semibold text-gray-900">{summary.total_sales_count ?? 0}</span> total sales across all prompts
           </p>
         </div>
 
@@ -117,7 +117,7 @@ export function EarningsDashboard() {
                     <div className="flex-1">
                       <p className="font-medium text-gray-900">{prompt.title}</p>
                       <p className="text-sm text-gray-600">
-                        {prompt.sales} sales • ⭐ {prompt.avg_rating.toFixed(1)}
+                        {prompt.sales_count} sales{prompt.avg_rating != null ? ` • ⭐ ${prompt.avg_rating.toFixed(1)}` : ''}
                       </p>
                     </div>
                     <div className="text-right">
@@ -149,7 +149,7 @@ export function EarningsDashboard() {
                 <div key={payout.id} className="px-6 py-4 hover:bg-gray-50 transition-colors">
                   <div className="flex items-start justify-between">
                     <div>
-                      <p className="font-medium text-gray-900">{payout.total_amount} credits</p>
+                      <p className="font-medium text-gray-900">{payout.amount} credits</p>
                       <p className="text-sm text-gray-600">
                         {formatDistanceToNow(new Date(payout.created_at), { addSuffix: true })}
                       </p>
@@ -157,7 +157,7 @@ export function EarningsDashboard() {
                     <div className="text-right">
                       <span
                         className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-                          payout.status === 'paid'
+                          payout.status === 'completed'
                             ? 'bg-green-100 text-green-800'
                             : payout.status === 'pending'
                             ? 'bg-yellow-100 text-yellow-800'

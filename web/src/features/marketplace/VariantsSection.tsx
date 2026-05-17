@@ -1,7 +1,6 @@
 import { useVariants } from '@/hooks/useVariants';
 import { formatDistanceToNow } from 'date-fns';
 import { Link } from 'react-router-dom';
-import { EmptyState } from '@/components/EmptyState';
 
 interface VariantsSectionProps {
   promptId: string;

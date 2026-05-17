@@ -16,7 +16,7 @@ function GoogleIcon() {
 }
 
 export function RegisterPage() {
-  const { register, loginWithGoogle, isLoading, error, clearError } = useAuth();
+  const { register, isLoading, error, clearError } = useAuth();
   const [displayName, setDisplayName]         = useState('');
   const [email, setEmail]                     = useState('');
   const [password, setPassword]               = useState('');
@@ -32,6 +32,11 @@ export function RegisterPage() {
     if (password.length < 8) { setLocalError('Password must be at least 8 characters.'); return; }
     if (password !== confirmPassword) { setLocalError('Passwords do not match.'); return; }
     try { await register(email, password, displayName); } catch { }
+  };
+
+  const handleGoogleLogin = () => {
+    // Redirect to backend which handles the entire Google OAuth flow
+    window.location.href = 'http://localhost:8000/v1/auth/google';
   };
 
   const onFocus = (e: React.FocusEvent<HTMLInputElement>) => {
@@ -83,7 +88,7 @@ export function RegisterPage() {
                 className="text-[11px] font-bold tracking-widest uppercase"
                 style={{ color: '#7C3AED', letterSpacing: '0.1em' }}
               >
-                PromptVault Pro
+                Prompt Verse
               </span>
             </div>
 
@@ -104,7 +109,7 @@ export function RegisterPage() {
           {/* Google */}
           <button
             type="button"
-            onClick={loginWithGoogle}
+            onClick={handleGoogleLogin}
             className="flex w-full items-center justify-center gap-2.5 rounded-2xl border bg-white px-4 py-3 text-[13px] font-semibold text-gray-700 transition-all hover:bg-gray-50 hover:shadow-sm active:scale-[0.99]"
             style={{ borderColor: '#E4E2EE' }}
           >
@@ -236,7 +241,7 @@ export function RegisterPage() {
           </p>
 
           <p className="mt-6 text-center text-[11px] text-gray-300">
-            © 2025 PromptVault Pro
+            © 2025 Prompt Verse
           </p>
         </div>
       </div>

@@ -1,11 +1,12 @@
 import { create } from 'zustand';
-import { tokenStore } from '@/api/client';
+import { api, tokenStore } from '@/api/client';
 
 export interface User {
   id: string;
   email: string;
   display_name: string;
   avatar_url?: string;
+  plan?: 'free' | 'pro' | 'enterprise';
 }
 
 interface AuthState {
@@ -20,11 +21,13 @@ interface AuthState {
   setIsLoading: (value: boolean) => void;
   setError: (error: string | null) => void;
   clearError: () => void;
+  updateUser: (patch: Partial<User>) => void;
   logout: () => void;
+  loginWithToken: (token: string) => Promise<void>;
   refreshUser: () => Promise<void>;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
+export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   isAuthenticated: false,
   isLoading: true,
@@ -35,20 +38,41 @@ export const useAuthStore = create<AuthState>((set) => ({
   setIsLoading: (value) => set({ isLoading: value }),
   setError: (error) => set({ error }),
   clearError: () => set({ error: null }),
+  updateUser: (patch) => {
+    const current = get().user;
+    if (current) set({ user: { ...current, ...patch } });
+  },
   logout: () => {
     tokenStore.clear();
+    localStorage.removeItem('token');
+    localStorage.removeItem('pv_ext_token');
+    window.dispatchEvent(new Event('PV_AUTH_LOGOUT'));
     set({ user: null, isAuthenticated: false, error: null });
+  },
+  loginWithToken: async (token: string) => {
+    set({ isLoading: true });
+    try {
+      localStorage.setItem('token', token);
+      localStorage.setItem('pv_ext_token', token);
+      tokenStore.set(token);
+      window.dispatchEvent(new CustomEvent('PV_AUTH_SYNC', { detail: { token } }));
+      const user = await api.get<User>('/auth/me');
+      set({ user, isAuthenticated: true, error: null, isLoading: false });
+    } catch (err) {
+      tokenStore.clear();
+      localStorage.removeItem('token');
+      localStorage.removeItem('pv_ext_token');
+      set({ isAuthenticated: false, user: null, error: 'Failed to sign in with Google', isLoading: false });
+      throw err;
+    }
   },
   refreshUser: async () => {
     set({ isLoading: true });
     try {
-      // Try to get token from localStorage or memory
       let token = tokenStore.get();
       if (!token) {
         token = typeof localStorage !== 'undefined' ? localStorage.getItem('token') : null;
-        if (token) {
-          tokenStore.set(token);
-        }
+        if (token) tokenStore.set(token);
       }
 
       if (!token) {
@@ -56,26 +80,11 @@ export const useAuthStore = create<AuthState>((set) => ({
         return;
       }
 
-      const response = await fetch('http://localhost:8000/v1/auth/me', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (response.ok) {
-        const user = await response.json();
-        set({ user, isAuthenticated: true, error: null, isLoading: false });
-      } else {
-        // Token is invalid, clear it
-        tokenStore.clear();
-        if (typeof localStorage !== 'undefined') {
-          localStorage.removeItem('token');
-        }
-        set({ isAuthenticated: false, user: null, isLoading: false });
-      }
-    } catch (err) {
-      console.error('Failed to refresh user:', err);
+      const user = await api.get<User>('/auth/me');
+      set({ user, isAuthenticated: true, error: null, isLoading: false });
+    } catch {
+      tokenStore.clear();
+      localStorage.removeItem('token');
       set({ isAuthenticated: false, user: null, isLoading: false });
     }
   },

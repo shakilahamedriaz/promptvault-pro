@@ -1,7 +1,7 @@
 import { useParams } from 'react-router-dom';
 import { useCreator } from '@/hooks/useCreator';
 import { formatDistanceToNow } from 'date-fns';
-import { StarIcon, UserIcon } from '@heroicons/react/24/solid';
+import { UserIcon } from '@heroicons/react/24/solid';
 import { PromptCard } from '../marketplace/PromptCard';
 
 export function CreatorProfilePage() {
@@ -67,27 +67,29 @@ export function CreatorProfilePage() {
 
               {profile.bio && <p className="text-gray-700 mb-4">{profile.bio}</p>}
 
-              <p className="text-sm text-gray-500">
-                Joined {formatDistanceToNow(new Date(profile.created_at), { addSuffix: true })}
-              </p>
+              {profile.created_at && (
+                <p className="text-sm text-gray-500">
+                  Joined {formatDistanceToNow(new Date(profile.created_at), { addSuffix: true })}
+                </p>
+              )}
             </div>
           </div>
 
           {/* Stats */}
           <div className="grid grid-cols-4 gap-4 mt-8">
             <div className="bg-white rounded-lg p-4 shadow-sm">
-              <div className="text-2xl font-bold text-gray-900">{profile.total_prompts}</div>
+              <div className="text-2xl font-bold text-gray-900">{profile.total_prompts ?? profile.prompt_count}</div>
               <div className="text-sm text-gray-600">Prompts</div>
             </div>
             <div className="bg-white rounded-lg p-4 shadow-sm">
               <div className="flex items-center gap-1">
-                <span className="text-2xl font-bold text-gray-900">{profile.avg_quality_score.toFixed(1)}</span>
+                <span className="text-2xl font-bold text-gray-900">{(profile.avg_quality_score ?? 0).toFixed(1)}</span>
                 <span className="text-xs text-gray-500">/100</span>
               </div>
               <div className="text-sm text-gray-600">Avg Quality</div>
             </div>
             <div className="bg-white rounded-lg p-4 shadow-sm">
-              <div className="text-2xl font-bold text-gray-900">{profile.total_ratings}</div>
+              <div className="text-2xl font-bold text-gray-900">{profile.total_ratings ?? 0}</div>
               <div className="text-sm text-gray-600">Ratings</div>
             </div>
             <div className="bg-white rounded-lg p-4 shadow-sm">
@@ -107,12 +109,14 @@ export function CreatorProfilePage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {prompts.map(prompt => (
+            {(prompts as Parameters<typeof PromptCard>[0]['prompt'][]).map((prompt) => (
               <PromptCard
                 key={prompt.id}
                 prompt={prompt}
+                isImported={false}
                 onImport={() => {}}
-                onTogglePublish={() => {}}
+                onPreview={() => {}}
+                onRate={() => {}}
               />
             ))}
           </div>

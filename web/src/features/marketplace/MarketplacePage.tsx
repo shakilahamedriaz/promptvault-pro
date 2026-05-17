@@ -1,17 +1,12 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import {
   MagnifyingGlassIcon,
   ArrowDownTrayIcon,
-  StarIcon as StarOutline,
-  XMarkIcon,
-  ChevronRightIcon,
   GlobeAltIcon,
-  ArrowUpTrayIcon,
-  HeartIcon as HeartOutline,
   AdjustmentsHorizontalIcon,
 } from '@heroicons/react/24/outline';
-import { StarIcon as StarSolid, HeartIcon as HeartSolid } from '@heroicons/react/24/solid';
+import { StarIcon as StarSolid } from '@heroicons/react/24/solid';
 import { clsx } from 'clsx';
 import { formatDistanceToNow } from 'date-fns';
 import { Button } from '@/components/Button';
@@ -23,10 +18,25 @@ import { ReviewsSection } from './ReviewsSection';
 import { VariantsSection } from './VariantsSection';
 import { AdvancedFilters } from './AdvancedFilters';
 import { PromptCard } from './PromptCard';
-import { useAuthStore } from '@/store/authStore';
+
+function StarRating({ rating, count }: { rating: number; count: number }) {
+  return (
+    <div className="flex items-center gap-2">
+      <div className="flex gap-0.5">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <StarSolid
+            key={star}
+            className={clsx('h-3.5 w-3.5', star <= Math.round(rating) ? 'text-yellow-400' : 'text-gray-200')}
+          />
+        ))}
+      </div>
+      <span className="text-xs text-gray-500">{rating.toFixed(1)} ({count})</span>
+    </div>
+  );
+}
 
 const CATEGORIES = ['All', 'General', 'Writing', 'Coding', 'Analysis', 'Creative', 'Research', 'Business', 'Education', 'Marketing', 'Other'];
-const SORT_OPTIONS = [
+const SORT_OPTIONS: { value: SortOption; label: string }[] = [
   { value: 'newest', label: 'Newest' },
   { value: 'popular', label: 'Most Forked' },
   { value: 'rating', label: 'Top Rated' },
@@ -42,7 +52,7 @@ function PreviewModal({ prompt, isOpen, onClose, onImport, isImported }: { promp
       isOpen={isOpen}
       onClose={onClose}
       title={prompt.title}
-      size="3xl"
+      size="2xl"
       footer={
         <>
           <Button variant="ghost" onClick={onClose}>
@@ -128,7 +138,6 @@ function PreviewModal({ prompt, isOpen, onClose, onImport, isImported }: { promp
 // ─── Marketplace Page ──────────────────────────────────────────────────────────
 
 export function MarketplacePage() {
-  const { user } = useAuthStore();
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('All');
   const [sort, setSort] = useState<SortOption>('newest');
@@ -140,11 +149,12 @@ export function MarketplacePage() {
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
-  const { prompts, total, isLoading, forkPrompt, ratePrompt, getMyRating, favoritePrompt, unfavoritePrompt } = useMarketplace({
-    search,
+  const { prompts, total, isLoading, forkPrompt, ratePrompt, favoritePrompt, unfavoritePrompt } = useMarketplace({
+    q: search,
     category: category === 'All' ? '' : category,
     sort,
     page,
+    per_page: 20,
   });
 
   const totalPages = Math.ceil(total / 20);

@@ -46,6 +46,7 @@ class Prompt(Base):
         nullable=True,
     )
     description = Column(Text, nullable=True)
+    image_url = Column(String(500), nullable=True)
     price_credits = Column(Integer, nullable=True)
     created_at = Column(
         TIMESTAMP(timezone=True),

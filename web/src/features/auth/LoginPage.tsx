@@ -1,4 +1,4 @@
-import React, { useState, FormEvent } from 'react';
+import { useState, FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '@/hooks/useAuth';
@@ -16,7 +16,7 @@ function GoogleIcon() {
 }
 
 export function LoginPage() {
-  const { login, loginWithGoogle, isLoading, error, clearError } = useAuth();
+  const { login, isLoading, error, clearError } = useAuth();
   const [email, setEmail]       = useState('');
   const [password, setPassword] = useState('');
   const [showPass, setShowPass] = useState(false);
@@ -25,6 +25,11 @@ export function LoginPage() {
     e.preventDefault();
     clearError();
     try { await login(email, password); } catch { }
+  };
+
+  const handleGoogleLogin = () => {
+    // Redirect to backend which handles the entire Google OAuth flow
+    window.location.href = 'http://localhost:8000/v1/auth/google';
   };
 
   return (
@@ -60,7 +65,7 @@ export function LoginPage() {
                   className="text-[11px] font-bold tracking-widest uppercase"
                   style={{ color: '#7C3AED', letterSpacing: '0.1em' }}
                 >
-                  PromptVault Pro
+                  Prompt Verse
                 </span>
               </div>
 
@@ -84,7 +89,7 @@ export function LoginPage() {
             {/* Google */}
             <button
               type="button"
-              onClick={loginWithGoogle}
+              onClick={handleGoogleLogin}
               className="flex w-full items-center justify-center gap-3 rounded-xl border bg-white px-4 py-3.5 text-[14px] font-semibold text-gray-800 shadow-sm transition-all hover:bg-gray-50 hover:shadow active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-1"
               style={{ borderColor: '#D4D0E8' }}
             >
@@ -194,7 +199,7 @@ export function LoginPage() {
 
         {/* Footer */}
         <p className="shrink-0 py-5 text-center text-[11px] text-gray-400">
-          © 2026 PromptVault Pro
+          © 2026 Prompt Verse
         </p>
       </div>
 

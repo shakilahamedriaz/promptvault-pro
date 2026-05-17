@@ -15,8 +15,14 @@ export interface Review {
   author_name: string;
 }
 
+interface ReviewsResponse {
+  items: Review[];
+  total: number;
+}
+
 export function useReviews(promptId: string) {
   const [reviews, setReviews] = useState<Review[]>([]);
+  const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -24,10 +30,11 @@ export function useReviews(promptId: string) {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await api.get(`/marketplace/prompts/${promptId}/reviews`);
-      setReviews(response.data.items || []);
-    } catch (err: any) {
-      setError(err.message);
+      const response = await api.get<ReviewsResponse>(`/marketplace/prompts/${promptId}/reviews`);
+      setReviews(response.items ?? []);
+      setTotal(response.total ?? 0);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to load reviews");
     } finally {
       setIsLoading(false);
     }
@@ -39,15 +46,16 @@ export function useReviews(promptId: string) {
 
   const createReview = useCallback(async (title: string, content: string, rating: number) => {
     try {
-      const response = await api.post(`/marketplace/prompts/${promptId}/reviews`, {
+      const result = await api.post<Review>(`/marketplace/prompts/${promptId}/reviews`, {
         title,
         content,
         rating,
       });
-      setReviews((prev) => [response.data, ...prev]);
-      return response.data;
-    } catch (err: any) {
-      setError(err.message);
+      setReviews((prev) => [result, ...prev]);
+      setTotal((n) => n + 1);
+      return result;
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to post review");
       throw err;
     }
   }, [promptId]);
@@ -66,11 +74,11 @@ export function useReviews(promptId: string) {
             : r
         )
       );
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to vote");
       throw err;
     }
   }, []);
 
-  return { reviews, isLoading, error, createReview, voteHelpful, fetchReviews };
+  return { reviews, total, isLoading, error, createReview, voteHelpful, fetchReviews };
 }
